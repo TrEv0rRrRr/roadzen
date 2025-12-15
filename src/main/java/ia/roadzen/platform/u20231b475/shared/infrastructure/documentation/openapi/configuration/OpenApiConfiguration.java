@@ -51,7 +51,6 @@ public class OpenApiConfiguration {
             languageSchema.example("en");
             languageSchema.setDefault("en");
 
-            // Definimos el parámetro
             Parameter acceptLanguageHeader = new Parameter()
                     .in("header")
                     .name("Accept-Language")
