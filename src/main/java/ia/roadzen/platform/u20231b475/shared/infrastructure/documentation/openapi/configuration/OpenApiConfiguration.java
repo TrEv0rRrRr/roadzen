@@ -4,9 +4,14 @@ import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.media.StringSchema;
+import org.springdoc.core.customizers.OperationCustomizer; // Importante importar esto
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.HandlerMethod;
+import io.swagger.v3.oas.models.Operation;
 
 @Configuration
 public class OpenApiConfiguration {
@@ -22,7 +27,7 @@ public class OpenApiConfiguration {
 
     // Methods
     @Bean
-    public OpenAPI learningPlatformOpenApi() {
+    public OpenAPI openApiConfig() {
         // General configuration
         var openApi = new OpenAPI();
         openApi
@@ -34,6 +39,30 @@ public class OpenApiConfiguration {
                                 .url("https://springdoc.org")))
                 .externalDocs(new ExternalDocumentation()
                         .description("RoadZen Platform"));
+
         return openApi;
+    }
+
+    @Bean
+    public OperationCustomizer addGlobalHeaders() {
+        return (Operation operation, HandlerMethod handlerMethod) -> {
+
+            StringSchema languageSchema = new StringSchema();
+            languageSchema.example("en");
+            languageSchema.setDefault("en");
+
+            // Definimos el parámetro
+            Parameter acceptLanguageHeader = new Parameter()
+                    .in("header")
+                    .name("Accept-Language")
+                    .description("Language for localized responses (e.g. en, es)")
+                    .required(false)
+                    .schema(languageSchema);
+
+            // Lo agregamos a la operación actual
+            operation.addParametersItem(acceptLanguageHeader);
+
+            return operation;
+        };
     }
 }
