@@ -1,13 +1,16 @@
 package ia.roadzen.platform.u20231b475.fleetmanagement.application.internal.eventhandlers;
 
+import org.springframework.context.MessageSource;
 import org.springframework.context.event.EventListener;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ia.roadzen.platform.u20231b475.fleetmanagement.domain.model.valueobjects.VehicleIdentificationNumber;
 import ia.roadzen.platform.u20231b475.fleetmanagement.infrastructure.persistence.jpa.repositories.VehiclesRepository;
-import ia.roadzen.platform.u20231b475.shared.application.i18n.MessageResolver;
 import ia.roadzen.platform.u20231b475.telemetry.domain.model.events.TelemetryRecordRegisteredEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This service handles the TelemetryRecordRegisteredEvent
@@ -15,11 +18,12 @@ import ia.roadzen.platform.u20231b475.telemetry.domain.model.events.TelemetryRec
 @Service
 public class TelemetryRecordRegisteredEventHandler {
   private final VehiclesRepository repo;
-  private final MessageResolver messageResolver;
+  private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryRecordRegisteredEventHandler.class);
+  private final MessageSource messageSource;
 
-  public TelemetryRecordRegisteredEventHandler(VehiclesRepository repo, MessageResolver messageResolver) {
+  public TelemetryRecordRegisteredEventHandler(VehiclesRepository repo, MessageSource messageSource) {
     this.repo = repo;
-    this.messageResolver = messageResolver;
+    this.messageSource = messageSource;
   }
 
   /**
@@ -31,7 +35,7 @@ public class TelemetryRecordRegisteredEventHandler {
     var vehicleOpt = repo.findVehicleByVin(new VehicleIdentificationNumber(event.getVehicleVin()));
 
     if (vehicleOpt.isEmpty())
-      throw new IllegalArgumentException(messageResolver.resolve("vehicle.notExistsError"));
+      LOGGER.error(messageSource.getMessage("vehicle.notExistsError", null, LocaleContextHolder.getLocale()));
 
     var vehicle = vehicleOpt.get();
 
