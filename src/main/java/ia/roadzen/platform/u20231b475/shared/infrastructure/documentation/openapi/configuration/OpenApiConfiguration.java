@@ -36,9 +36,7 @@ public class OpenApiConfiguration {
                         .description(this.applicationDescription)
                         .version(this.applicationVersion)
                         .license(new License().name("Apache 2.0")
-                                .url("https://springdoc.org")))
-                .externalDocs(new ExternalDocumentation()
-                        .description("RoadZen Platform"));
+                                .url("https://springdoc.org")));
 
         return openApi;
     }
