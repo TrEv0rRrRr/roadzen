@@ -2,9 +2,12 @@ package ia.roadzen.platform.u20231b475.telemetry.application.internal.commandser
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
-import ia.roadzen.platform.u20231b475.shared.application.i18n.MessageResolver;
 import ia.roadzen.platform.u20231b475.telemetry.application.internal.outboundservices.acl.ExternalFleetManagementService;
 import ia.roadzen.platform.u20231b475.telemetry.domain.model.aggregates.TelemetryRecord;
 import ia.roadzen.platform.u20231b475.telemetry.domain.model.commands.CreateTelemetryRecordCommand;
@@ -18,13 +21,14 @@ import ia.roadzen.platform.u20231b475.telemetry.infrastructure.persistence.jpa.r
 public class TelemetryRecordCommandServiceImpl implements TelemetryRecordCommandService {
   private final TelemetryRecordRepository repo;
   private final ExternalFleetManagementService service;
-  private final MessageResolver messageResolver;
+  private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryRecordCommandServiceImpl.class);
+  private final MessageSource messageSource;
 
   public TelemetryRecordCommandServiceImpl(TelemetryRecordRepository repo, ExternalFleetManagementService service,
-      MessageResolver messageResolver) {
+      MessageSource messageSource) {
     this.repo = repo;
     this.service = service;
-    this.messageResolver = messageResolver;
+    this.messageSource = messageSource;
   }
 
   /**
@@ -34,7 +38,7 @@ public class TelemetryRecordCommandServiceImpl implements TelemetryRecordCommand
   public Optional<TelemetryRecord> handle(CreateTelemetryRecordCommand command) {
     boolean exists = service.existsVehicleByVin(command.vin());
     if (!exists) {
-      throw new IllegalArgumentException(messageResolver.resolve("vehicle.notExistsError"));
+      LOGGER.error(messageSource.getMessage("vehicle.notExistsError", null, LocaleContextHolder.getLocale()));
     }
 
     var telemetryRecord = new TelemetryRecord(command);
